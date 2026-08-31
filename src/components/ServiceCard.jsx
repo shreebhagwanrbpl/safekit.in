@@ -24,25 +24,25 @@ export default function ServiceCard({
   }
 
   return (
-    <div className="group bg-white rounded-[30px] p-8 border border-[#E8C8D0] shadow-[0_15px_40px_rgba(123,30,58,0.08)] hover:-translate-y-2 transition-all duration-300">
+    <div className="group bg-white rounded-[30px] p-8 border border-[#E8DDE0] shadow-[0_15px_40px_rgba(136,5,20,0.08)] hover:-translate-y-2 transition-all duration-300">
 
 
       {/* Icon */}
-      <div className="w-16 h-16 rounded-[22px] bg-[#FFF5F7] text-[#7B1E3A] flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
+      <div className="w-16 h-16 rounded-[22px] bg-[#FFF6D6] text-[#880514] flex items-center justify-center mb-6 group-hover:scale-110 transition duration-300">
         {icon}
       </div>
 
 
 
       {/* Title */}
-      <h3 className="text-2xl font-semibold text-[#2D1B21] mb-4">
+      <h3 className="text-2xl font-semibold text-[#241015] mb-4">
         {title}
       </h3>
 
 
 
       {/* Description */}
-      <p className="text-[#6B4A54] leading-7 mb-6">
+      <p className="text-[#514348] leading-7 mb-6">
         {description}
       </p>
 

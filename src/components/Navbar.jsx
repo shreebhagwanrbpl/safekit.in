@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-
+import Image from "next/image";
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -46,36 +46,34 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#E8C8D0]">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-[#E8DDE0]">
 
       <div className="container-custom h-20 flex items-center justify-between">
 
 
+
         {/* Logo */}
         <Link href={makeLink("/")}>
-          <h1 className="text-xl md:text-2xl font-bold text-[#7B1E3A]">
-
-            Central
-
-            <span className="text-[#2D1B21]">
-              {" "}Biomedicals
-            </span>
-
-          </h1>
+          <Image
+            src="/logo.png"
+            alt="Raj Biosis"
+            width={90}
+            height={35}
+            priority
+            className="h-auto w-[70px] md:w-[90px] object-contain"
+          />
         </Link>
 
 
-
-
         {/* Desktop Menu */}
-        <nav className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[#6B4A54]">
+        <nav className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[#514348]">
 
           {navLinks.map((link) => (
 
             <Link
               key={link.name}
               href={makeLink(link.path)}
-              className="hover:text-[#7B1E3A] transition duration-300"
+              className="hover:text-[#880514] transition duration-300"
             >
               {link.name}
             </Link>
@@ -96,7 +94,7 @@ export default function Navbar() {
             <button
               className="
             rounded-xl
-            bg-[#7B1E3A]
+            bg-[#880514]
             px-7
             py-3
             font-semibold
@@ -104,7 +102,7 @@ export default function Navbar() {
             shadow-md
             transition-all
             duration-300
-            hover:bg-[#5A132B]
+            hover:bg-[#6F0411]
             hover:shadow-lg
           "
             >
@@ -124,7 +122,7 @@ export default function Navbar() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden text-[#7B1E3A]"
+          className="lg:hidden text-[#880514]"
         >
 
           {menuOpen ? (
@@ -161,10 +159,10 @@ export default function Navbar() {
       >
 
 
-        <div className="bg-white border-t border-[#E8C8D0] p-6">
+        <div className="bg-white border-t border-[#E8DDE0] p-6">
 
 
-          <nav className="flex flex-col gap-5 text-[#6B4A54] font-medium">
+          <nav className="flex flex-col gap-5 text-[#514348] font-medium">
 
 
             {navLinks.map((link) => (
@@ -173,7 +171,7 @@ export default function Navbar() {
                 key={link.name}
                 href={makeLink(link.path)}
                 onClick={() => setMenuOpen(false)}
-                className="hover:text-[#7B1E3A] transition"
+                className="hover:text-[#880514] transition"
               >
 
                 {link.name}
@@ -197,12 +195,12 @@ export default function Navbar() {
               mt-3
               w-full
               rounded-xl
-              bg-[#7B1E3A]
+              bg-[#880514]
               py-3
               font-semibold
               text-white
               transition-all
-              hover:bg-[#5A132B]
+              hover:bg-[#6F0411]
             "
               >
 

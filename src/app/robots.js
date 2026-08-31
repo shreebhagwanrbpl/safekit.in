@@ -1,11 +1,22 @@
+import { BASE_URL } from "@/lib/config";
+
 export default function robots() {
     return {
         rules: {
             userAgent: "*",
             allow: "/",
+            disallow: [
+                "/admin/",
+                "/dashboard/",
+                "/api/",
+                "/_next/",
+                "/*?search=",
+                "/*?filter=",
+                "/*&filter=",
+                "/*?sort=",
+            ],
         },
 
-        sitemap:
-            "https://centralbiomedicals.com/sitemap.xml",
+        sitemap: `${BASE_URL}/sitemap.xml`,
     };
 }

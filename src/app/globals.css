@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #0f6cbd;
-  --secondary: #14b8a6;
+  --primary: #880514;
+  --secondary: #C59A00;
   --text: #0f172a;
   --muted: #64748b;
   --bg: #f8fafc;
@@ -60,10 +60,10 @@ img {
 .gradient-bg {
   background:
     radial-gradient(circle at top left,
-      rgba(15, 108, 189, 0.08),
+      rgba(136, 5, 20, 0.08),
       transparent 30%),
     radial-gradient(circle at top right,
-      rgba(20, 184, 166, 0.08),
+      rgba(248, 200, 16, 0.10),
       transparent 30%),
     #f8fafc;
 }

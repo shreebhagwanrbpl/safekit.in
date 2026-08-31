@@ -7,34 +7,34 @@ export default function Testimonials() {
   const reviews = [
     {
       name: "Dr. Rajesh Kumar",
-      role: "Healthcare Specialist",
+      role: "Laboratory Operations Lead",
       review:
-        "Central Biomedicals has consistently delivered reliable diagnostic equipment with outstanding support.",
+        "The product information made it easier for our team to compare collection and safety supplies before placing an order.",
     },
     {
       name: "Amit Sharma",
-      role: "Lab Director",
+      role: "Procurement Coordinator",
       review:
-        "Professional service, premium products, and excellent biomedical consultation experience.",
+        "We value the clear specifications and quick responses when we need help with routine supply requirements.",
     },
     {
       name: "Neha Verma",
-      role: "Research Head",
+      role: "Clinical Support Coordinator",
       review:
-        "Their healthcare solutions improved our laboratory efficiency significantly.",
-    },
+        "SafeKit has been useful when we need practical safety items for day-to-day clinical operations and replenishment.",
+    }
   ];
 
   return (
-    <section className="section-padding bg-[#FFF8F9]">
+    <section className="section-padding bg-[#FCFAF7]">
 
       <div className="container-custom">
 
 
         <SectionTitle
-          badge="Testimonials"
-          title="What Our Clients Say"
-          description="Trusted by healthcare professionals, laboratories, and biomedical institutions."
+          badge="Customer Experiences"
+          title="What Customers Say About Working With Us"
+          description="Feedback from teams using safety supplies in clinical, collection and laboratory settings."
           center
         />
 
@@ -62,12 +62,12 @@ export default function Testimonials() {
               viewport={{
                 once: true,
               }}
-              className="bg-white rounded-[32px] p-8 border border-[#E8C8D0] shadow-[0_15px_40px_rgba(123,30,58,0.08)] hover:-translate-y-2 transition-all duration-300"
+              className="bg-white rounded-[32px] p-8 border border-[#E8DDE0] shadow-[0_15px_40px_rgba(136,5,20,0.08)] hover:-translate-y-2 transition-all duration-300"
             >
 
 
               {/* Stars */}
-              <div className="flex gap-1 text-[#C89B3C] text-xl mb-5">
+              <div className="flex gap-1 text-[#C59A00] text-xl mb-5">
                 ★★★★★
               </div>
 
@@ -75,7 +75,7 @@ export default function Testimonials() {
 
 
               {/* Review */}
-              <p className="text-[#6B4A54] leading-8 italic">
+              <p className="text-[#514348] leading-8 italic">
                 "{item.review}"
               </p>
 
@@ -83,14 +83,14 @@ export default function Testimonials() {
 
 
               {/* User */}
-              <div className="mt-8 border-t border-[#E8C8D0] pt-5">
+              <div className="mt-8 border-t border-[#E8DDE0] pt-5">
 
-                <h4 className="font-semibold text-lg text-[#2D1B21]">
+                <h4 className="font-semibold text-lg text-[#241015]">
                   {item.name}
                 </h4>
 
 
-                <p className="text-[#6B4A54]">
+                <p className="text-[#514348]">
                   {item.role}
                 </p>
 

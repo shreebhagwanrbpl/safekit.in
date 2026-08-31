@@ -2,58 +2,23 @@ export default function SeoContent({ city = "" }) {
     const location = city || "India";
 
     return (
-        <section className="py-20 bg-[#FFF8F9]">
+        <section className="py-20 bg-[#FCFAF7]">
 
             <div className="container-custom">
 
 
                 {/* Main Heading */}
-                <h2 className="text-4xl font-extrabold text-[#2D1B21] mb-8">
-                    Biomedical Equipment Supplier in {location}
+                <h2 className="text-4xl font-extrabold text-[#241015] mb-8">
+                    Medical Safety Kits & Clinical Safety Supplies Supplier in {location}
                 </h2>
 
 
 
                 {/* Content */}
-                <div className="space-y-6 text-[#6B4A54] leading-8 text-lg">
+                <div className="space-y-6 text-[#514348] leading-8 text-lg">
 
 
-                    <p>
-                        Central Biomedicals is a trusted supplier of biomedical
-                        and laboratory equipment in {location}. We provide
-                        CBC Machines, Hematology Analyzers, Biochemistry
-                        Analyzers, Urine Analyzers, ELISA Readers and
-                        diagnostic instruments for hospitals, pathology labs
-                        and healthcare facilities.
-                    </p>
-
-
-
-                    <p>
-                        Our mission is to provide reliable and high-quality
-                        laboratory equipment to healthcare professionals across
-                        India. We work with diagnostic centres, hospitals,
-                        research laboratories and medical institutions to
-                        deliver advanced biomedical solutions.
-                    </p>
-
-
-
-                    <p>
-                        We offer installation assistance, product guidance and
-                        technical support for a wide range of laboratory
-                        instruments. Whether you are setting up a new
-                        diagnostic laboratory or upgrading existing equipment,
-                        our team can help you select the right solution.
-                    </p>
-
-
-
-                    <p>
-                        Central Biomedicals supplies equipment across multiple
-                        districts and cities, helping healthcare providers
-                        improve testing efficiency and diagnostic accuracy.
-                    </p>
+                    <p>Raj Biosis distributes medical safety kits and clinical protective supplies across multiple cities, securing safety compliance for diagnostic centers and healthcare teams.</p>
 
 
                 </div>
@@ -66,7 +31,7 @@ export default function SeoContent({ city = "" }) {
                 <div className="mt-16">
 
 
-                    <h2 className="text-3xl font-extrabold text-[#2D1B21] mb-8">
+                    <h2 className="text-3xl font-extrabold text-[#241015] mb-8">
                         Frequently Asked Questions
                     </h2>
 
@@ -77,16 +42,11 @@ export default function SeoContent({ city = "" }) {
 
 
 
-                        <div className="rounded-2xl border border-[#E8C8D0] bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-[#E8DDE0] bg-white p-6 shadow-sm">
 
-                            <h3 className="font-semibold text-xl text-[#7B1E3A]">
-                                Do you supply biomedical equipment across India?
-                            </h3>
+                            <h3 className="font-semibold text-xl text-[#880514]">Do you supply medical safety kits across India?</h3>
 
-                            <p className="text-[#6B4A54] mt-2">
-                                Yes, we supply biomedical and laboratory
-                                equipment across multiple districts and cities.
-                            </p>
+                            <p className="text-[#514348] mt-2">Yes, we supply medical safety kits, specimen collection supplies, and clinical protective wear across multiple districts and cities in India.</p>
 
                         </div>
 
@@ -94,17 +54,11 @@ export default function SeoContent({ city = "" }) {
 
 
 
-                        <div className="rounded-2xl border border-[#E8C8D0] bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-[#E8DDE0] bg-white p-6 shadow-sm">
 
-                            <h3 className="font-semibold text-xl text-[#7B1E3A]">
-                                Which laboratory instruments do you provide?
-                            </h3>
+                            <h3 className="font-semibold text-xl text-[#880514]">Which clinical safety products do you supply?</h3>
 
-                            <p className="text-[#6B4A54] mt-2">
-                                We provide CBC Machines, Hematology Analyzers,
-                                Biochemistry Analyzers, ELISA Readers, Urine
-                                Analyzers and other diagnostic equipment.
-                            </p>
+                            <p className="text-[#514348] mt-2">We supply sterile first aid kits, clinical safety kits, specimen collection containers, medical PPE, and laboratory safety gear.</p>
 
                         </div>
 
@@ -112,17 +66,11 @@ export default function SeoContent({ city = "" }) {
 
 
 
-                        <div className="rounded-2xl border border-[#E8C8D0] bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-[#E8DDE0] bg-white p-6 shadow-sm">
 
-                            <h3 className="font-semibold text-xl text-[#7B1E3A]">
-                                Do you provide installation support?
-                            </h3>
+                            <h3 className="font-semibold text-xl text-[#880514]">Do you provide support for safety compliance?</h3>
 
-                            <p className="text-[#6B4A54] mt-2">
-                                Yes, installation assistance and technical
-                                support are available depending on location and
-                                equipment type.
-                            </p>
+                            <p className="text-[#514348] mt-2">Yes, we provide detailed technical specifications, certifications, and product sheets to ensure your safety tools meet regulatory standards.</p>
 
                         </div>
 
@@ -130,17 +78,11 @@ export default function SeoContent({ city = "" }) {
 
 
 
-                        <div className="rounded-2xl border border-[#E8C8D0] bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-[#E8DDE0] bg-white p-6 shadow-sm">
 
-                            <h3 className="font-semibold text-xl text-[#7B1E3A]">
-                                Who can purchase biomedical equipment?
-                            </h3>
+                            <h3 className="font-semibold text-xl text-[#880514]">Who can purchase clinical safety kits from you?</h3>
 
-                            <p className="text-[#6B4A54] mt-2">
-                                Hospitals, pathology labs, diagnostic centres,
-                                research laboratories and healthcare facilities
-                                can purchase equipment from us.
-                            </p>
+                            <p className="text-[#514348] mt-2">Hospitals, health clinics, diagnostic collection centers, corporate medical departments, and safety compliance managers can order safety kits from us.</p>
 
                         </div>
 

@@ -15,41 +15,41 @@ export default function ServicesPreview() {
   const services = [
     {
       icon: <Microscope size={30} />,
-      title: "Diagnostic Equipment",
+      title: "Safety Kit Supply",
       description:
-        "Advanced diagnostic systems designed for accurate and efficient healthcare testing.",
+        "Ready-to-use and configurable safety supplies for clinical handling, collection and emergency needs.",
     },
     {
       icon: <FlaskConical size={30} />,
-      title: "Laboratory Solutions",
+      title: "Collection & Transport Supplies",
       description:
-        "Reliable laboratory instruments and biomedical support for modern medical environments.",
+        "Options for specimen handling, containment, transfer and organized collection workflows.",
     },
     {
       icon: <ShieldCheck size={30} />,
-      title: "Maintenance Support",
+      title: "Protective Consumables",
       description:
-        "Professional technical support and maintenance for biomedical systems.",
+        "Protective wear and routine consumables for staff-facing and patient-facing environments.",
     },
     {
       icon: <Stethoscope size={30} />,
-      title: "Healthcare Consultation",
+      title: "Usage & Product Guidance",
       description:
-        "Expert guidance and consultation for healthcare and biomedical operations.",
-    },
+        "Practical help with selecting products according to the task, environment, quantity and stated specifications.",
+    }
   ];
 
   return (
-    <section className="section-padding bg-[#FFF8F9]">
+    <section className="section-padding bg-[#FCFAF7]">
 
       <div className="container-custom">
 
 
         {/* Title */}
         <SectionTitle
-          badge="Our Services"
-          title="Premium Diagnostic & Biomedical Services"
-          description="Providing advanced healthcare technologies, laboratory systems, and trusted biomedical solutions for modern diagnostics."
+          badge="Services for Safer Clinical Workflows"
+          title="Procurement & Support for Clinical Supplies"
+          description="We help healthcare teams source safety products and biomedical essentials with clear specifications, practical guidance and dependable follow-up."
           center
         />
 
