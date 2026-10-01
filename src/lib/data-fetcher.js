@@ -1,189 +1,94 @@
-import { db } from "./firebase";
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+import { WEBSITE_ID, COMPANY_ID, makeSlug } from "./catalog-utils.js";
 
-// Simple in-memory cache for Firestore documents and catalog
-const docCache = {};
-let catalogPromise = null;
+export { WEBSITE_ID, COMPANY_ID, makeSlug };
 
-const makeSlug = (text = "") =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
-
-/**
- * Fetch a single document and cache its promise/data.
- */
-export async function fetchDocCached(path) {
-  if (docCache[path]) {
-    return docCache[path];
-  }
-  if (!docCache[path + "_promise"]) {
-    docCache[path + "_promise"] = (async () => {
-      try {
-        const parts = path.split("/");
-        const docRef = doc(db, ...parts);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          docCache[path] = data;
-          return data;
-        }
-        return null;
-      } catch (err) {
-        console.error(`Error fetching doc at ${path}:`, err);
-        // Clear promise on error to allow retries
-        delete docCache[path + "_promise"];
-        throw err;
-      }
-    })();
-  }
-  return docCache[path + "_promise"];
-}
-
-/**
- * Fetch and process the entire products catalog (categories, subcategories, legacy list).
- * Caches the result globally to eliminate repeat network reads during client-side navigation.
- */
-export async function fetchFullCatalog() {
-  if (catalogPromise) {
-    return catalogPromise;
-  }
-
-  catalogPromise = (async () => {
-    const startTime = performance.now();
+export async function fetchFullCatalog(options = {}) {
+  if (typeof window === "undefined") {
     try {
-      // 1. Fetch categories
-      const categorySnap = await getDocs(
-        collection(
-          db,
-          "websites",
-          "safekitin",
-          "pages",
-          "categoryproducts",
-          "categories"
-        )
-      );
-
-      const allProducts = [];
-
-      // Fetch all subcategories in parallel to solve N+1 issue
-      await Promise.all(
-        categorySnap.docs.map(async (categoryDoc) => {
-          const data = categoryDoc.data();
-          const categoryName = data.category || categoryDoc.id;
-
-          try {
-            const subcategoriesCol = collection(
-              db,
-              "websites",
-              "safekitin",
-              "pages",
-              "categoryproducts",
-              "categories",
-              categoryDoc.id,
-              "subcategories"
-            );
-
-            const subcategoriesSnap = await getDocs(subcategoriesCol);
-
-            subcategoriesSnap.forEach((subDoc) => {
-              const subData = subDoc.data();
-              const subCategoryName = subData.subCategory || subDoc.id;
-
-              const categoryProducts = (subData.products || [])
-                .filter((p) => p.isPublished !== false)
-                .map((item, index) => ({
-                  ...item,
-                  uid: `${categoryDoc.id}-${subDoc.id}-${index}`,
-                  category: categoryName,
-                  subCategory: subCategoryName,
-                  slug: item.slug || makeSlug(item.title),
-                }));
-
-              allProducts.push(...categoryProducts);
-            });
-          } catch (subErr) {
-            console.error(`Error fetching subcategories for category ${categoryDoc.id}:`, subErr);
-          }
-
-          // Fallback direct category products
-          if (data.products?.length) {
-            const directProducts = data.products
-              .filter((p) => p.isPublished !== false)
-              .map((item, index) => ({
-                ...item,
-                uid: `${categoryDoc.id}-direct-${index}`,
-                category: categoryName,
-                subCategory: item.subCategory || categoryName,
-                slug: item.slug || makeSlug(item.title),
-              }));
-            allProducts.push(...directProducts);
-          }
-        })
-      );
-
-      // Fetch old legacy products
-      try {
-        const oldSnap = await getDoc(
-          doc(
-            db,
-            "websites",
-            "safekitin",
-            "pages",
-            "products"
-          )
-        );
-
-        if (oldSnap.exists()) {
-          const oldProducts = (oldSnap.data().products || [])
-            .filter((p) => p.isPublished !== false)
-            .map((item, index) => ({
-              ...item,
-              uid: `other-${index}`,
-              category: "Other Products",
-              subCategory: item.subCategory || "Other Products",
-              slug: item.slug || makeSlug(item.title),
-            }));
-
-          allProducts.push(...oldProducts);
-        }
-      } catch (oldErr) {
-        console.error("Error fetching legacy products:", oldErr);
-      }
-
-      const duration = performance.now() - startTime;
-      console.log(`[data-fetcher] Raw Firestore fetchFullCatalog completed in ${duration.toFixed(2)}ms`);
-
-      return allProducts;
+      const { getFullCatalog } = await import("./mongoDb.js");
+      const products = await getFullCatalog(COMPANY_ID, WEBSITE_ID);
+      return products;
     } catch (err) {
-      console.error("Error fetching full catalog:", err);
-      // Clear cache promise on error to allow retries
-      catalogPromise = null;
-      throw err;
+      console.error("[data-fetcher] Server MongoDB getFullCatalog error:", err);
     }
-  })();
+  }
 
-  return catalogPromise;
+  try {
+    const url = options.forceRefresh
+      ? `/api/catalog?t=${Date.now()}`
+      : "/api/catalog";
+    const res = await fetch(url, { cache: "no-store" });
+    if (res.ok) {
+      const json = await res.json();
+      return Array.isArray(json.products) ? json.products : [];
+    }
+  } catch (err) {
+    console.error("[data-fetcher] Browser fetchFullCatalog error:", err);
+  }
+
+  return [];
 }
 
-/**
- * Helpers for cached document retrieval across pages
- */
-export async function fetchHomeData() {
-  return fetchDocCached("websites/safekitin/pages/home");
+export async function fetchPageData(pageType = "home") {
+  if (typeof window === "undefined") {
+    try {
+      const { getPageData } = await import("./mongoDb.js");
+      const data = await getPageData(pageType, WEBSITE_ID, COMPANY_ID);
+      return data;
+    } catch (err) {
+      console.error(`[data-fetcher] Server getPageData(${pageType}) error:`, err);
+    }
+  }
+
+  try {
+    const res = await fetch(`/api/site-data?type=${pageType}`, { cache: "no-store" });
+    if (res.ok) {
+      const json = await res.json();
+      return json.data || null;
+    }
+  } catch (err) {
+    console.error(`[data-fetcher] Browser fetchPageData(${pageType}) error:`, err);
+  }
+
+  return null;
 }
 
-export async function fetchContactData() {
-  return fetchDocCached("websites/safekitin/pages/contact");
+export async function fetchHomeData(options = {}) {
+  return fetchPageData("home");
 }
 
-export async function fetchServicesData() {
-  return fetchDocCached("websites/safekitin/pages/services");
+export async function fetchContactData(options = {}) {
+  return fetchPageData("contact");
 }
 
-export async function fetchDistrictData(district) {
+export async function fetchServicesData(options = {}) {
+  return fetchPageData("services");
+}
+
+export async function fetchDistricts(options = {}) {
+  if (typeof window === "undefined") {
+    try {
+      const { getDistricts } = await import("./mongoDb.js");
+      return await getDistricts(WEBSITE_ID, COMPANY_ID);
+    } catch (err) {
+      console.error("[data-fetcher] Server getDistricts error:", err);
+    }
+  }
+
+  try {
+    const res = await fetch("/api/site-data?type=districts", { cache: "no-store" });
+    if (res.ok) {
+      const json = await res.json();
+      return Array.isArray(json.data) ? json.data : [];
+    }
+  } catch (err) {
+    console.error("[data-fetcher] Browser fetchDistricts error:", err);
+  }
+
+  return [];
+}
+
+export async function fetchDistrictData(district, options = {}) {
   if (!district) return null;
-  return fetchDocCached(`websites/safekitin/districts/${district}`);
+  return fetchPageData(district);
 }

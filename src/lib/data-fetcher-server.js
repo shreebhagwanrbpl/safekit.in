@@ -1,29 +1,39 @@
-import { fetchFullCatalog as fetchFullCatalogRaw } from "./data-fetcher";
-import { cache } from "react";
+import {
+  getFullCatalog,
+  getPageData,
+  getDistricts as getDistrictsFromDb,
+  getDistrictData as getDistrictDataFromDb,
+} from "./mongoDb.js";
+import { WEBSITE_ID, COMPANY_ID } from "./catalog-utils.js";
 
-// Global in-memory cache for the server process to bypass Next.js 2MB unstable_cache limit
-let cachedCatalog = null;
-let cachedCatalogTimestamp = 0;
-const CACHE_TTL = 3600 * 1000; // 1 hour in milliseconds
-
-async function getCachedCatalog() {
-  const now = Date.now();
-  if (cachedCatalog && (now - cachedCatalogTimestamp) < CACHE_TTL) {
-    console.log(`[data-fetcher-server] Serving catalog from server memory cache (${((now - cachedCatalogTimestamp) / 1000).toFixed(1)}s old)`);
-    return cachedCatalog;
-  }
-
-  console.log("[data-fetcher-server] Server memory cache miss or expired. Fetching raw catalog from Firestore...");
-  const data = await fetchFullCatalogRaw();
-  cachedCatalog = data;
-  cachedCatalogTimestamp = now;
-  return data;
+export async function fetchFullCatalog() {
+  const start = performance.now();
+  const products = await getFullCatalog(COMPANY_ID, WEBSITE_ID);
+  const end = performance.now();
+  console.log(
+    `[data-fetcher-server] fetchFullCatalog took ${(end - start).toFixed(
+      2
+    )}ms, returned ${products.length} visible products for ${WEBSITE_ID}`
+  );
+  return products;
 }
 
-export const fetchFullCatalog = cache(async () => {
-  const start = performance.now();
-  const products = await getCachedCatalog();
-  const end = performance.now();
-  console.log(`[data-fetcher-server] fetchFullCatalog took ${(end - start).toFixed(2)}ms`);
-  return products;
-});
+export async function fetchDistricts() {
+  return await getDistrictsFromDb(WEBSITE_ID, COMPANY_ID);
+}
+
+export async function fetchDistrictData(district) {
+  return await getDistrictDataFromDb(district, WEBSITE_ID, COMPANY_ID);
+}
+
+export async function fetchHomeData() {
+  return await getPageData("home", WEBSITE_ID, COMPANY_ID);
+}
+
+export async function fetchContactData() {
+  return await getPageData("contact", WEBSITE_ID, COMPANY_ID);
+}
+
+export async function fetchServicesData() {
+  return await getPageData("services", WEBSITE_ID, COMPANY_ID);
+}
