@@ -14,6 +14,9 @@ const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "company_master_cms";
 let cachedClient = global._mongoClient;
 let cachedDb = global._mongoDb;
 
+/**
+ * Connects to MongoDB Atlas cluster and returns the database instance
+ */
 export async function getDb() {
   if (cachedDb) return cachedDb;
 
@@ -41,6 +44,9 @@ export async function getDb() {
   }
 }
 
+/**
+ * Helper to safely parse document data whether stored as a JSON string or object
+ */
 function parseDocData(doc) {
   if (!doc) return null;
   if (doc.data && typeof doc.data === "string") {
@@ -56,6 +62,9 @@ function parseDocData(doc) {
   return doc;
 }
 
+/**
+ * Normalizes raw product into the standard frontend format
+ */
 export function normalizeProduct(item, index = 0) {
   if (!item || typeof item !== "object") return null;
 
@@ -65,11 +74,21 @@ export function normalizeProduct(item, index = 0) {
     item.productSlug ||
     makeSlug(title || `product-${item.id || item._id || index}`);
 
-  const images = Array.isArray(item.images)
-    ? item.images.filter(Boolean)
+  const rawImages = Array.isArray(item.images) && item.images.length > 0
+    ? item.images
+    : Array.isArray(item.originalImages) && item.originalImages.length > 0
+    ? item.originalImages
     : item.image
     ? [item.image]
+    : item.imageUrl
+    ? [item.imageUrl]
     : [];
+
+  const images = rawImages.filter(Boolean);
+  const mainImage = images[0] || item.image || item.imageUrl || "";
+
+  const categoryName = (item.category || item.categoryName || "").trim();
+  const subCategoryName = (item.subCategory || item.subCategoryName || categoryName || "").trim();
 
   return {
     id: String(item.id || item._id || `prod-${index}`),
@@ -90,13 +109,13 @@ export function normalizeProduct(item, index = 0) {
     automation: item.automation || "",
     availability: item.availability || "",
     size: item.size || "",
-    category: item.category || "General Products",
-    subCategory: item.subCategory || item.category || "General Products",
+    category: categoryName || "Products",
+    subCategory: subCategoryName || categoryName || "Products",
     categoryId: item.categoryId || "general",
     subcategoryId: item.subcategoryId || "general",
     slug,
-    images,
-    image: images[0] || "",
+    images: images.length > 0 ? images : (mainImage ? [mainImage] : []),
+    image: mainImage,
     video: item.video || item.videoUrl || "",
     pdf: item.pdf || item.pdfUrl || "",
     isPublished: item.isPublished !== false,
@@ -105,6 +124,12 @@ export function normalizeProduct(item, index = 0) {
   };
 }
 
+/**
+ * High-performance MongoDB Catalog Fetcher
+ * Cascades visibility from Category -> Subcategory -> Product
+ * Supports both `documents` collection schema (collection_path/doc_id/data)
+ * and direct collections (`products`, `categories`, `subcategories`).
+ */
 export async function getFullCatalog(
   companyId = COMPANY_ID,
   websiteId = WEBSITE_ID
@@ -119,9 +144,11 @@ export async function getFullCatalog(
     const collections = await db.listCollections().toArray();
     const collectionNames = collections.map((c) => c.name);
 
+    // MODE 1: Check `documents` collection (Standard SuperAdmin Dump Format)
     if (collectionNames.includes("documents")) {
       const docsColl = db.collection("documents");
 
+      // 1. Fetch Categories for company
       const catDocs = await docsColl
         .find({ collection_path: `companies/${companyId}/categories` })
         .toArray();
@@ -129,10 +156,12 @@ export async function getFullCatalog(
       for (const catRow of catDocs) {
         const catData = parseDocData(catRow);
         if (!catData) continue;
+
         if (!isItemVisibleOnWebsite(catData, websiteId)) continue;
 
         const catName = catData.name || catData.category || catRow.doc_id;
 
+        // 2. Fetch Subcategories
         const subDocs = await docsColl
           .find({
             collection_path: `companies/${companyId}/categories/${catRow.doc_id}/subcategories`,
@@ -142,10 +171,12 @@ export async function getFullCatalog(
         for (const subRow of subDocs) {
           const subData = parseDocData(subRow);
           if (!subData) continue;
+
           if (!isItemVisibleOnWebsite(subData, websiteId)) continue;
 
           const subName = subData.name || subData.subCategory || subRow.doc_id;
 
+          // Products embedded inside subcategory document
           if (Array.isArray(subData.products)) {
             for (let i = 0; i < subData.products.length; i++) {
               const p = subData.products[i];
@@ -166,6 +197,7 @@ export async function getFullCatalog(
             }
           }
 
+          // Products in subcollection
           const subProdDocs = await docsColl
             .find({
               collection_path: `companies/${companyId}/categories/${catRow.doc_id}/subcategories/${subRow.doc_id}/products`,
@@ -191,6 +223,7 @@ export async function getFullCatalog(
           }
         }
 
+        // Direct Category Products
         if (Array.isArray(catData.products)) {
           for (let i = 0; i < catData.products.length; i++) {
             const p = catData.products[i];
@@ -212,6 +245,7 @@ export async function getFullCatalog(
         }
       }
 
+      // Standalone Master Products
       const prodDocs = await docsColl
         .find({ collection_path: `companies/${companyId}/products` })
         .toArray();
@@ -223,35 +257,33 @@ export async function getFullCatalog(
       }
     }
 
-    if (collectionNames.includes("products")) {
-      const prodColl = db.collection("products");
-      const filter = {
-        $or: [
-          { companyId },
-          { company_id: companyId },
-          { companyId: { $exists: false } },
-        ],
-      };
-
-      const nativeProds = await prodColl.find(filter).toArray();
-      for (const p of nativeProds) {
-        if (!isItemVisibleOnWebsite(p, websiteId)) continue;
-        allProducts.push(normalizeProduct(p, allProducts.length));
+    // Deduplicate products by slug to prevent duplicate General Products entries
+    const seenKeys = new Set();
+    const uniqueProducts = [];
+    for (const p of allProducts) {
+      if (!p) continue;
+      const key = (p.slug || p.id || p.title || "").toLowerCase();
+      if (key && !seenKeys.has(key)) {
+        seenKeys.add(key);
+        uniqueProducts.push(p);
       }
     }
 
     const duration = performance.now() - start;
     console.log(
-      `[mongoDb] getFullCatalog returned ${allProducts.length} visible products for ${websiteId} in ${duration.toFixed(2)}ms`
+      `[mongoDb] getFullCatalog returned ${uniqueProducts.length} unique visible products for ${websiteId} in ${duration.toFixed(2)}ms`
     );
 
-    return allProducts.filter(Boolean);
+    return uniqueProducts;
   } catch (err) {
     console.error("[mongoDb] Error executing getFullCatalog:", err);
     return [];
   }
 }
 
+/**
+ * MongoDB Page Data Extractor (Home, Contact, Services)
+ */
 export async function getPageData(
   pageType = "home",
   websiteId = WEBSITE_ID,
@@ -264,6 +296,7 @@ export async function getPageData(
     const collections = await db.listCollections().toArray();
     const collectionNames = collections.map((c) => c.name);
 
+    // 1. Check `documents` collection first
     if (collectionNames.includes("documents")) {
       const docsColl = db.collection("documents");
       const candidatePaths = [
@@ -282,6 +315,7 @@ export async function getPageData(
       }
     }
 
+    // 2. Check direct `pages` collection
     if (collectionNames.includes("pages")) {
       const pagesColl = db.collection("pages");
       const pageDoc = await pagesColl.findOne({
@@ -296,6 +330,9 @@ export async function getPageData(
   return null;
 }
 
+/**
+ * MongoDB Districts Extractor
+ */
 export async function getDistricts(
   websiteId = WEBSITE_ID,
   companyId = COMPANY_ID
@@ -307,6 +344,7 @@ export async function getDistricts(
     const collections = await db.listCollections().toArray();
     const collectionNames = collections.map((c) => c.name);
 
+    // 1. Check `documents` collection
     if (collectionNames.includes("documents")) {
       const docsColl = db.collection("documents");
       const candidatePaths = [
@@ -328,6 +366,7 @@ export async function getDistricts(
       }
     }
 
+    // 2. Check direct `districts` collection
     if (collectionNames.includes("districts")) {
       const distColl = db.collection("districts");
       const rows = await distColl.find({}).toArray();
@@ -340,6 +379,9 @@ export async function getDistricts(
   return [];
 }
 
+/**
+ * MongoDB District Data Extractor
+ */
 export async function getDistrictData(
   district,
   websiteId = WEBSITE_ID,
